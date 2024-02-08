@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "a backend for flixplay",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js"
   },
@@ -15,6 +15,7 @@
   "author": "Shivanshu Sagar",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "prettier": "^3.2.5"
   }
 }
