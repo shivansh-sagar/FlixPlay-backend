@@ -10,7 +10,7 @@ dotenv.config({
 connectDB()
 .then(()=>{
 
-    app.om("error",(error)=>{
+    app.on("error",(error)=>{
         console.log("ERROR : APP is not talk to DataBase ", error);
         throw error
     })
