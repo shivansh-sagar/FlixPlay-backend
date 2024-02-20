@@ -21,7 +21,7 @@ const registerUser = asyncHandler(async (req,res)=>{
 
     //req.body for access data send in the body. It allow you to recived payload that the client sends to the server
     const {username, email, fullname, password}= req.body
-    console.log("this is req.body ", req.body)
+    // console.log("this is req.body ", req.body)
 
     
     //Basic
@@ -50,10 +50,12 @@ const registerUser = asyncHandler(async (req,res)=>{
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     let coverImageLocalPath;
-    if(registerUser.files && Array.isArray(req.f))
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
 
-    console.log("this is req. file" , req.files)
+    // console.log("this is req. file" , req.files)
 
     //vaildation throw error if avatar file is not found 
     if (!avatarLocalPath) {
