@@ -4,6 +4,23 @@ import {User} from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
+
+const generateAccessAndRefereshTokens = async(userId)=>{
+
+    try {
+       const user = await User.findById(userId)
+       const accessToken = user.generateAccessToken()
+       const refreshToken = user.generateRefreshToken()
+
+       user.refreshToken = refreshToken;
+       await user.save({validateBeforeSave: false})
+
+       return{accessToken, refreshToken}
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating refresh and access token")
+    }
+}
+
 const registerUser = asyncHandler(async (req,res)=>{
     
     //get user details from postman/frontend
@@ -94,6 +111,110 @@ const registerUser = asyncHandler(async (req,res)=>{
 
 })
  
+const loginUser = asyncHandler(async(req, res) =>{
+    // req body -> data
+    // for login we use email and password || username and password
+    //find the user
+    // compare the credintial with already registered user 
+    // - if match then gave acces and refresh token
+    // else show error message
+    // send cookies
+
+    const {email, username, password} = req.body
+    // one of the field is required
+    if(!username || !email){
+        throw new ApiError(400, "username or email is required")
+    }
+
+    //finding user threw email and username
+    const user = await User.findOne({
+        $or: [{username}, {email}]
+    })
+
+    // if user not exist throw error api message
+    if(!user){
+        throw new ApiError(404, "User does not exist")
+    }
+
+    // checking password is correst or not useing the function
+    const isPasswordvalid = await user.isPasswordCorrect(password)
+
+    //if the password doesnt match throw api error
+    if(!isPasswordvalid){
+        throw new ApiError(401, "Invalid credentials")
+    }
+
+    // calling function to generate access and refresh token
+    const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+
+    // here we are calling database again because on line 130 we are making call but we are generating token below that so in user the token is empty, So we have to option 1- update the object 2- make a new call
+
+    //here we are making new call to the database now we have bth the tokens 
+    const loggedInUser = await User.findById(user._id).select("-password refreshToken")
+
+    //sending cookies
+
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    //return res.status(200).cookie("accessTokens", accessToken, option)
+    return res
+    .status(200)
+    .cookie("accessTokens", accessToken, option)
+    .cookie("refreshToken", refreshToken, option)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User logged In Successfully"
+        ))
+
+})
+
+const logoutUser = asyncHandler(async(req, res)=>{
+    //clean the cookie
+    // clear the token from the User
+
+
+    //here we are using this user with the help of auth.middleware
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const option = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", option)
+    .clearCookie("refreshToken", option)
+    .json(
+        new ApiResponse(
+            200,
+            {},
+            "User logged Out"
+        )
+    )
+
+})
+
+
 export {
-    registerUser
+    registerUser,
+    loginUser,
+    logoutUser
 }
