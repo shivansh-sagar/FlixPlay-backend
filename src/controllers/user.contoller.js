@@ -63,7 +63,7 @@ const registerUser = asyncHandler(async (req,res)=>{
     }
 
     // requseting avatar and coverImg from client
-    const avatarLocalPath =  req.files?.avatar[0]?.path;
+    const avatarLocalPath =  req.files?.avatar?.[0]?.path;
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
     let coverImageLocalPath;
@@ -121,10 +121,13 @@ const loginUser = asyncHandler(async(req, res) =>{
     // send cookies
 
     const {email, username, password} = req.body
-    // one of the field is required
-    if(!username || !email){
+    
+    if(!username && !email){
         throw new ApiError(400, "username or email is required")
     }
+
+    // one of the field is required
+    // if(!(username || email))
 
     //finding user threw email and username
     const user = await User.findOne({
