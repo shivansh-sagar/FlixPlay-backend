@@ -11,10 +11,10 @@ const generateAccessAndRefereshTokens = async(userId)=>{
        const user = await User.findById(userId)
        const accessToken = user.generateAccessToken()
        const refreshToken = user.generateRefreshToken()
-
+        console.log(accessToken)
        user.refreshToken = refreshToken;
        await user.save({validateBeforeSave: false})
-
+        console.log("hey im called")
        return{accessToken, refreshToken}
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating refresh and access token")
@@ -61,6 +61,7 @@ const registerUser = asyncHandler(async (req,res)=>{
     if(existedUser){
         throw new ApiError(409, "User with same email or username already exist") 
     }
+
 
     // requseting avatar and coverImg from client
     const avatarLocalPath =  req.files?.avatar?.[0]?.path;
@@ -138,9 +139,9 @@ const loginUser = asyncHandler(async(req, res) =>{
     if(!user){
         throw new ApiError(404, "User does not exist")
     }
-
-    // checking password is correst or not useing the function
+    // checking password is correst or not using the function
     const isPasswordvalid = await user.isPasswordCorrect(password)
+    
 
     //if the password doesnt match throw api error
     if(!isPasswordvalid){
@@ -153,7 +154,7 @@ const loginUser = asyncHandler(async(req, res) =>{
     // here we are calling database again because on line 130 we are making call but we are generating token below that so in user the token is empty, So we have to option 1- update the object 2- make a new call
 
     //here we are making new call to the database now we have bth the tokens 
-    const loggedInUser = await User.findById(user._id).select("-password refreshToken")
+    const loggedInUser = await User.findById(user._id).select(" -password -refreshToken")
 
     //sending cookies
 
