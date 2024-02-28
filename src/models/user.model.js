@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema(
     coverImage: {
       type: String,
     },
+    refreshToken: {
+      type: String,
+    },
     watchHistory: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -42,9 +45,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
-    refreshToken: {
-      type: String,
-    },
+   
   },
   { timestamps: true }
 );
@@ -74,7 +75,7 @@ userSchema.methods.generateAccessToken = function (){
     expiresIn: process.env.ACCESS_TOKEN_EXPIER
     
   },
-  console.log("generate")
+
   )
 }
 //generating refresh token
@@ -82,6 +83,7 @@ userSchema.methods.generateRefreshToken= function (){
   return jwt.sign({
     _id: this._id,
   },
+
   process.env.REFRESH_TOKEN_SECRET,{
     expiresIn: process.env.REFRESH_TOKEN_EXPIRY
   }

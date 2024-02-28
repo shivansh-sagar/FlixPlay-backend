@@ -1,1 +1,1 @@
-export const DB_NAME = "flixplay";
+export const DB_NAME = "play";
